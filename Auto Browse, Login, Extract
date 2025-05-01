@@ -1,0 +1,90 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
+import time
+
+options = Options() #Creates an Options object to customize how Chrome runs.
+
+# options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0 Safari/537.36")
+
+driver = webdriver.Chrome(
+    service=Service(ChromeDriverManager().install()), 
+    #ChromeDriverManager().install(): Automatically downloads the right version of ChromeDriver based on your installed Chrome.
+    #ChromeDriver is a bridge between your Python (or any language using Selenium) script and the Google Chrome browser.
+    #It allows Selenium to control Chrome just like a human: clicking buttons, filling forms, scrolling, and reading text from pages.
+    
+    #Service(...): Starts the ChromeDriver service for Selenium to use.
+
+    #webdriver.Chrome(...): Starts the actual browser, applying all your custom options.
+    #WebDriver is A Selenium API, Lets your code control a browser in general
+    #ChromeDriver A browser-specific executable (for Chrome). Translates WebDriver commands into Chrome actions	
+    options=options) #options=options: Lets you pass Chrome options (e.g., headless mode, user agent, etc.).
+    #launch the Chrome browser
+    #driver is a WebDriver object.
+
+
+
+try:
+    driver.get('https://my.employer.seek.com/') 
+
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'a[data-test="sign-in-page"]'))
+    ).click()
+
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'emailAddress'))
+    ).send_keys('myhello@gmail.com')
+
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'password'))
+    ).send_keys('hello123!')
+
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[type="submit"]'))
+    ).click()
+
+    print("Page title after login:", driver.title)
+    print("Current URL:", driver.current_url)
+    with open("page_dump.html", "w", encoding="utf-8") as f:
+        f.write(driver.page_source)
+
+    WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/talentsearch/')]"))
+    ).click()
+
+
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "uncoupledFreeText"))
+        #EC.presence_of_element_located((By.XPATH, "//input[@id='uncoupledFreeText']"))
+    ).send_keys('software engineer')
+
+# Wait for the search button to be clickable and click it
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[type="submit"]'))
+    ).click()
+    
+
+    time.sleep(5)
+    results = WebDriverWait(driver, 10).until(
+           EC.presence_of_all_elements_located((By.XPATH, "//a[contains(@href, '/talentsearch/')]"))
+       )
+    if not results:
+        print("No results found.")
+
+    for result in results:
+        print(result.text)
+
+
+finally:
+    driver.quit()
+
+
