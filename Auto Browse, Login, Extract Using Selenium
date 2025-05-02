@@ -62,7 +62,7 @@ try:
     ).click()
 
     #WebDriverWait(driver, 10).until(
-    #    EC.elements_to_be_clickable((By.XPATH, "//strong[text(), 'TOGL Marketing']"))
+    #    EC.element_to_be_clickable((By.XPATH, "//strong[text(), 'TOGL Marketing']"))
     #).click()
 
     
